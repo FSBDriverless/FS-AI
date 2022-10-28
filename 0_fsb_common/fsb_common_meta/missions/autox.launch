@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-
-  <include file="$(find perception_meta)/missions/autox.launch"/>
-  <include file="$(find estimation_meta)/missions/autox.launch"/>
-  <include file="$(find control_meta)/missions/autox.launch"/>
-
-</launch>
