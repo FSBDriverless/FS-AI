@@ -8,21 +8,35 @@ Este es el workspace de desarrollo driverless de Formula Student Bizkaia.
   |__ build
   |__ devel
   |__ src
-      |__ fsb_common
+      |__ 0_fsb_common
       |   |__ include
       |   |__ src
       |   |   |__ pointcludo_to_laserscan
       |   |   |__ py
       |
-      |__ perception
+      |__ 1_perception
       |   |...
       |
-      |__ estimation
-      |   |__ include
-      |   |__ src
+      |__ 2_estimation
+      |   |...
+      |   
       |
-      |__ control
-          |...
+      |__ 3_slam
+      |   |...
+      |
+      |
+      |__ 3_slam
+      |   |...
+      |
+      |
+      |__ 4_planification
+      |   |...
+      |
+      |
+      |__ 5_control
+      |   |...
+      |
+      |
 ```
 
 ## Source del workspace
