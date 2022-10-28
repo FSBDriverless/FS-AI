@@ -1,2 +1,2 @@
-# FS-AI
-Repositorio para llevar a la competición de FS-AI en Silverstone
+# DESARROLLOS
+Rama para ir guardando diferentes desarrollos e implementaciones de diferentes algoritmos
