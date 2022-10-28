@@ -19,24 +19,18 @@ Este es el workspace de desarrollo driverless de Formula Student Bizkaia.
       |
       |__ 2_estimation
       |   |...
-      |   
       |
       |__ 3_slam
       |   |...
       |
-      |
       |__ 3_slam
       |   |...
-      |
       |
       |__ 4_planification
       |   |...
       |
-      |
       |__ 5_control
-      |   |...
-      |
-      |
+          |...
 ```
 
 ## Source del workspace
