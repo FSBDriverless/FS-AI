@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import rclpy
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from rclpy.node import Node
 from std_msgs.msg import String
 from eufs_msgs.msg import ConeArrayWithCovariance
@@ -32,6 +33,14 @@ import triangle as tr
 import time
 
 class MinimalSubscriber(Node):
+    def ordenar_respecto(self, coche, lista):
+        x = coche[0]
+        y = coche[1]
+        return sorted(lista, key=lambda p: (p[0] - x) ** 2 + (p[1] - y) ** 2)
+
+    def getImage(path, zoom=1):
+        return OffsetImage(plt.imread(path), zoom=zoom)
+
     def getEdges(self, triangle, edges, isEven):
         # t0 t1
         if (isEven[0] + isEven[1] == 1):
@@ -58,6 +67,10 @@ class MinimalSubscriber(Node):
         points_interiores = np.array([[o.point.x, o.point.y] for o in conos_interiores])
         points_exteriores = np.array([[o.point.x, o.point.y] for o in conos_exteriores])
 
+        # De precondición tendremos que la lista tiene que venir ordenada
+        points_exteriores = self.ordenar_respecto([0, 0], points_exteriores)
+        points_interiores = self.ordenar_respecto([0, 0], points_interiores)
+
         m = len(points_interiores)  # Numeros de conos pares en la lista P
         nc = len(points_interiores[0])  # Numeros de conos impares en la lista P
         mo = len(points_exteriores)
@@ -71,17 +84,21 @@ class MinimalSubscriber(Node):
             else:
                 P[i] = points_exteriores[math.floor(i / 2)]
 
-        internalEdges = []
-        # for i in range(interv, 2 * interv, interv):
-
         internal = []
-        # if i + interv >= 2 * interv:  # Es el ultimo punto (Solo para que se vea bien y poder cerrar el circuito)
-        #     points = P[(i - interv):]
-        #     np.append(points, P[:2])
-        # else:
-        #     points = P[(i - interv):(i + 2)]
+
+        xmax, ymax = P.max(axis=0)
+        xmin, ymin = P.min(axis=0)
+
+        self.ax.set_xlim([-2.0, xmax + 1.0])
+        self.ax.set_ylim([ymin - 2.0, ymax + 2.0])
+
+        # Posición del eje de dirección (No esta bien)
+        dirX = 2.0
+        dirY = 0.0
+        internal.append(np.array([dirX, dirY]))  # Para despues hacer la trayectoria desde el morro del coche
+
         edgesMatrix = np.zeros([P.shape[0], P.shape[0]])
-        # internalEdges = []
+
         # Crear triangulacion con constantes
         TR = Delaunay(P)
         s = TR.simplices
@@ -96,7 +113,7 @@ class MinimalSubscriber(Node):
                 s = np.delete(s, i, 0)
             else:
                 edgesMatrix = self.getEdges(x, edgesMatrix, isEven)
-                i = i + 1;
+                i = i + 1
 
         for fila in range(0, P.shape[0]):
             for columna in range(0, fila):
@@ -105,8 +122,6 @@ class MinimalSubscriber(Node):
                     p2 = P[columna]
 
                     internal.append(np.array([(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2]))
-
-                    # Hay que arreglar TODO,
 
         interna = np.array(internal)
         tck, u = splprep([interna[:, 0], interna[:, 1]], k=3, s=32)
@@ -139,8 +154,6 @@ class MinimalSubscriber(Node):
         # loop until all UI events
         # currently waiting have been processed
         self.figure.canvas.flush_events()
-        # time.sleep(0.1)
-
 
     def __init__(self):
         super().__init__('minimal_subscriber')
@@ -157,13 +170,13 @@ class MinimalSubscriber(Node):
 
         self.figure = plt.figure(figsize=(10, 10))
         self.ax = self.figure.add_subplot(111)
-        # plt.xlim([-20, 20])
-        # plt.ylim([-20, 20])
+
+        self.imgCoche = AnnotationBbox(self.getImage('img/coche.png', zoom=0.4), (0, 0), frameon=False)
+        self.ax.add_artist(self.imgCoche)
 
         self.conosPlt, = self.ax.plot([], [], '.', label='Conos', color='orange')
         self.puntosMediosPlt, = self.ax.plot([], [], '.', label='Puntos Medios', color='blue')
-        self.interpolacionPlt, = self.ax.plot([], [], label='Interpolación', color='red')       
-        #coche = np.array([[0, 0.5],[0, -0.5], [0.7, 0]])
+        self.interpolacionPlt, = self.ax.plot([], [], label='Interpolación', color='red')
         
         plt.xlabel("X(m)")
         plt.ylabel("Y(m)")
@@ -176,13 +189,14 @@ class MinimalSubscriber(Node):
     def listener_callback(self, msg):
         blue_cones = msg.blue_cones
         yellow_cones = msg.yellow_cones
-        orange_cones = msg.orange_cones
-        big_orange_cones = msg.big_orange_cones
 
-        self.get_logger().info('I heard blue_cones: "%d"' % len(blue_cones))
-        self.get_logger().info('I heard yellow_cones: "%d"' % len(yellow_cones))
-        self.get_logger().info('I heard orange_cones: "%d"' % len(orange_cones))
-        self.get_logger().info('I heard big_orange_cones: "%d"' % len(big_orange_cones))
+        #orange_cones = msg.orange_cones
+        #big_orange_cones = msg.big_orange_cones
+
+        # self.get_logger().info('I heard blue_cones: "%d"' % len(blue_cones))
+        # self.get_logger().info('I heard yellow_cones: "%d"' % len(yellow_cones))
+        # self.get_logger().info('I heard orange_cones: "%d"' % len(orange_cones))
+        # self.get_logger().info('I heard big_orange_cones: "%d"' % len(big_orange_cones))
 
         self.triangulacion(blue_cones, yellow_cones)
 
