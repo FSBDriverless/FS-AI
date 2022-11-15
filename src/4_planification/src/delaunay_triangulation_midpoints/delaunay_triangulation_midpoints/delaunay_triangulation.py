@@ -15,6 +15,8 @@
 import rclpy
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from rclpy.node import Node
+from geometry_msgs.msg import PoseStamped
+from nav_msgs.msg import Path
 from std_msgs.msg import String
 from eufs_msgs.msg import ConeArrayWithCovariance
 from eufs_msgs.msg import ConeWithCovariance
@@ -31,6 +33,30 @@ from scipy.spatial.distance import pdist
 import matplotlib.pyplot as plt
 import triangle as tr
 import time
+
+class MinimalPublisher(Node):
+
+    def __init__(self):
+        super().__init__('minimal_publisher')
+        self.publisher_ = self.create_publisher(Path, '/path', 10)
+
+    def publish_marker(self, pathX, pathY):
+
+        msg = Path()
+        msg.header.frame_id = "base_footprint"
+        #msg.header.stamp = Node.get_clock().now()
+
+        for i in range(0, len(pathX)):
+            actX = pathX[i]
+            actY = pathY[i]
+            pose = PoseStamped()
+            pose.pose.position.x = actX
+            pose.pose.position.y = actY
+            pose.pose.position.z = 0.0
+            msg.poses.append(pose)
+
+        self.publisher_.publish(msg)
+        print('Publishing')
 
 class MinimalSubscriber(Node):
     def ordenar_respecto(self, coche, lista):
@@ -144,8 +170,8 @@ class MinimalSubscriber(Node):
         self.puntosMediosPlt.set_xdata(interna[:, 0])
         self.puntosMediosPlt.set_ydata(interna[:, 1])
 
-        self.interpolacionPlt.set_xdata(out[:, 0])
-        self.interpolacionPlt.set_ydata(out[:, 1])
+        self.interpolacionPlt.set_xdata(out[0])
+        self.interpolacionPlt.set_ydata(out[1])
 
         self.triangulacionPlt.pop(0).remove()
         self.triangulacionPlt = self.ax.triplot(P[:,0], P[:,1], s, color='grey')
@@ -157,10 +183,15 @@ class MinimalSubscriber(Node):
         # loop until all UI events
         # currently waiting have been processed
         self.figure.canvas.flush_events()
+        self.minimal_publisher.publish_marker(out[0], out[1])
 
+    #def __init__(self, minimal_publisher):
     def __init__(self):
         super().__init__('minimal_subscriber')
-        self.i = 0
+
+        self.minimal_publisher = MinimalPublisher()
+        #rclpy.spin(self.minimal_publisher)
+
         self.subscription = self.create_subscription(
             ConeArrayWithCovariance,
             '/ground_truth/cones',
@@ -180,8 +211,8 @@ class MinimalSubscriber(Node):
         self.conosPlt, = self.ax.plot([], [], '.', label='Conos', color='orange')
         self.puntosMediosPlt, = self.ax.plot([], [], '.', label='Puntos Medios', color='blue')
         self.interpolacionPlt, = self.ax.plot([], [], label='Interpolación', color='red')
-        self.triangulacionPlt, = self.ax.triplot([0,0.1,0.1], [0,0.1,-0.1], [0,1,2], label='Triangulación', color='grey')
-        
+        self.triangulacionPlt = self.ax.triplot([0,0.1,0.1], [0,0.1,-0.1], [[0,1,2]], label='Triangulación', color='grey')
+
         plt.xlabel("X(m)")
         plt.ylabel("Y(m)")
         plt.title('Triangulación de delaunay \nsin bordes exteriores y \ncon puntos medios',
@@ -194,28 +225,26 @@ class MinimalSubscriber(Node):
         blue_cones = msg.blue_cones
         yellow_cones = msg.yellow_cones
 
-        #orange_cones = msg.orange_cones
-        #big_orange_cones = msg.big_orange_cones
-
-        # self.get_logger().info('I heard blue_cones: "%d"' % len(blue_cones))
-        # self.get_logger().info('I heard yellow_cones: "%d"' % len(yellow_cones))
-        # self.get_logger().info('I heard orange_cones: "%d"' % len(orange_cones))
-        # self.get_logger().info('I heard big_orange_cones: "%d"' % len(big_orange_cones))
-
         self.triangulacion(blue_cones, yellow_cones)
 
 
 def main(args=None):
     rclpy.init(args=args)
-
+    print(1)
+    #minimal_publisher = MinimalPublisher()
+    #rclpy.spin(minimal_publisher)
+    print(2)
+    #minimal_subscriber = MinimalSubscriber(minimal_publisher)
     minimal_subscriber = MinimalSubscriber()
-
+    print(3)
     rclpy.spin(minimal_subscriber)
-
+    print(4)
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_subscriber.destroy_node()
+
+    #minimal_publisher.destroy_node()
+    #minimal_subscriber.destroy_node()
     rclpy.shutdown()
 
 
