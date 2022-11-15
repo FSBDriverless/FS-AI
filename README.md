@@ -1,21 +1,16 @@
-# FSB Workspace
-Este es el workspace de desarrollo driverless de Formula Student Bizkaia.
+# PLANIFICACIÓN BRANCH
 
+En esta rama encontraremos los desarrollos relacionados con el modulo de planificación, el cual se encargara de hacer la planificación de trayectoria dependiendo de la misión actual.
 
 ## Estructura del workspace:
 ```
-~/fsbdriverless
-  |__ build
-  |__ devel
+~/FS-AI
+  |__ img
+  |   |...
+  |
   |__ src
       |__ 0_fsb_common
-      |   |__ fsb_common_meta
-      |   |   |__ missions
-      |   |
-      |   |__ fsb_common_msg
-      |   |__ src
-      |   |   |__ pointcludo_to_laserscan
-      |   |   |__ py
+      |   |...
       |
       |__ 1_perception
       |   |...
@@ -24,20 +19,21 @@ Este es el workspace de desarrollo driverless de Formula Student Bizkaia.
       |   |...
       |
       |__ 3_slam
-      |   |...
-      |
-      |__ 3_slam
-      |   |...
+      |   |...     
       |
       |__ 4_planification
-      |   |...
+      |   |__ src
+      |       |__ delaunay_triangulation_midpoints
       |
       |__ 5_control
           |...
 ```
 
 ## Source del workspace
-Suponiendo que el el proyecto está clonado en $HOME:  
+Suponiendo que el el proyecto está clonado en ~/FS-AI y tenemos una terminal abierta en esa dirección:
+* Para construir el modulo solo con el paquete de delaunay_triangulation_midpoints
 ```
-echo "source ~/FSBDriverless/workspace/devel/setup.bash">> ~/.bashrc
+colcon build --packages-select delaunay_triangulation_midpoints
+source ./install/setup.bash
+ros2 run delaunay_triangulation_midpoints delaunay   
 ```

@@ -38,7 +38,7 @@ class MinimalSubscriber(Node):
         y = coche[1]
         return sorted(lista, key=lambda p: (p[0] - x) ** 2 + (p[1] - y) ** 2)
 
-    def getImage(path, zoom=1):
+    def getImage(self, path, zoom=1):
         return OffsetImage(plt.imread(path), zoom=zoom)
 
     def getEdges(self, triangle, edges, isEven):
@@ -137,15 +137,18 @@ class MinimalSubscriber(Node):
         #
         # self.puntosMediosPlt.set_xdata(np.append(self.puntosMediosPlt.get_xdata(), interna[:, 0]))
         # self.puntosMediosPlt.set_ydata(np.append(self.puntosMediosPlt.get_ydata(), interna[:, 1]))
-        self.interpolacionPlt.set_xdata(out[0])
-        self.interpolacionPlt.set_ydata(out[1])
 
         self.conosPlt.set_xdata(P[:, 0])
         self.conosPlt.set_ydata(P[:, 1])
 
         self.puntosMediosPlt.set_xdata(interna[:, 0])
         self.puntosMediosPlt.set_ydata(interna[:, 1])
-        #plt.triplot(P[:, 0], P[:, 1], s, color='grey') #Tiene que poderse borrar
+
+        self.interpolacionPlt.set_xdata(out[:, 0])
+        self.interpolacionPlt.set_ydata(out[:, 1])
+
+        self.triangulacionPlt.pop(0).remove()
+        self.triangulacionPlt = self.ax.triplot(P[:,0], P[:,1], s, color='grey')
 
         # drawing updated values
         self.figure.canvas.draw()
@@ -171,12 +174,13 @@ class MinimalSubscriber(Node):
         self.figure = plt.figure(figsize=(10, 10))
         self.ax = self.figure.add_subplot(111)
 
-        self.imgCoche = AnnotationBbox(self.getImage('img/coche.png', zoom=0.4), (0, 0), frameon=False)
+        self.imgCoche = AnnotationBbox(self.getImage('img/ads.png', zoom=0.4), (0, 0), frameon=False)
         self.ax.add_artist(self.imgCoche)
 
         self.conosPlt, = self.ax.plot([], [], '.', label='Conos', color='orange')
         self.puntosMediosPlt, = self.ax.plot([], [], '.', label='Puntos Medios', color='blue')
         self.interpolacionPlt, = self.ax.plot([], [], label='Interpolación', color='red')
+        self.triangulacionPlt, = self.ax.triplot([0,0.1,0.1], [0,0.1,-0.1], [0,1,2], label='Triangulación', color='grey')
         
         plt.xlabel("X(m)")
         plt.ylabel("Y(m)")
