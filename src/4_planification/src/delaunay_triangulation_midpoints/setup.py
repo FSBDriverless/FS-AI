@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'delaunay = delaunay_triangulation_midpoints.delaunay_triangulation:main',
+            'track_middle = delaunay_triangulation_midpoints.track_middle_path:main',
         ],
     },
 )

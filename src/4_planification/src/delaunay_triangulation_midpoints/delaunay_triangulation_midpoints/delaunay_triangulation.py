@@ -56,7 +56,6 @@ class MinimalPublisher(Node):
             msg.poses.append(pose)
 
         self.publisher_.publish(msg)
-        print('Publishing')
 
 class MinimalSubscriber(Node):
     def ordenar_respecto(self, coche, lista):
