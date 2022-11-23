@@ -173,7 +173,7 @@ class MinimalSubscriber(Node):
         self.interpolacionPlt.set_ydata(out[1])
 
         self.triangulacionPlt.pop(0).remove()
-        self.triangulacionPlt = self.ax.triplot(P[:,0], P[:,1], s, color='grey')
+        self.triangulacionPlt = self.ax.triplot(P[:, 0], P[:, 1], s, color='grey')
 
         # drawing updated values
         self.figure.canvas.draw()

@@ -25,8 +25,11 @@ from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 
 class TrackMiddlePath(Node):
-    def __init__(self, pathMarkerPublisher):
+    def getImage(self, path, zoom=1):
+        return OffsetImage(plt.imread(path), zoom=zoom)
+    def __init__(self, pathMarkerPublisher, plot):
         super().__init__('track_middle_path')
+        self.plot = plot
         self.pathMarkerPublisher = pathMarkerPublisher
         self.subscription = self.create_subscription(
             ConeArrayWithCovariance,
@@ -35,36 +38,60 @@ class TrackMiddlePath(Node):
             10)
         self.subscription  # prevent unused variable warning
 
-        # to run GUI event loop
-        # plt.ion()
-        #
-        # self.figure = plt.figure(figsize=(10, 10))
-        # self.ax = self.figure.add_subplot(111)
-        #
-        # self.imgCoche = AnnotationBbox(self.getImage('img/ads.png', zoom=0.4), (0, 0), frameon=False)
-        # self.ax.add_artist(self.imgCoche)
-        #
-        # self.conosPlt, = self.ax.plot([], [], '.', label='Conos', color='orange')
-        # self.puntosMediosPlt, = self.ax.plot([], [], '.', label='Puntos Medios', color='blue')
-        # self.interpolacionPlt, = self.ax.plot([], [], label='Interpolación', color='red')
-        # self.triangulacionPlt = self.ax.triplot([0,0.1,0.1], [0,0.1,-0.1], [[0,1,2]], label='Triangulación', color='grey')
-        #
-        # plt.xlabel("X(m)")
-        # plt.ylabel("Y(m)")
-        # plt.title('Triangulación de delaunay \nsin bordes exteriores y \ncon puntos medios',
-        #           fontsize=18,
-        #           color="black")
-        #
-        # plt.legend()
+        if self.plot:
+            # to run GUI event loop
+            plt.ion()
+
+            self.figure = plt.figure(figsize=(10, 10))
+            self.ax = self.figure.add_subplot(111)
+
+            self.imgCoche = AnnotationBbox(self.getImage('img/ads.png', zoom=0.25), (0, 0), frameon=False)
+            self.ax.add_artist(self.imgCoche)
+
+            self.conosPlt, = self.ax.plot([], [], '.', label='Conos', color='orange')
+            self.puntosMediosPlt, = self.ax.plot([], [], '.', label='Puntos Medios', color='blue')
+            self.interpolacionPlt, = self.ax.plot([], [], label='Interpolación', color='red')
+            self.triangulacionPlt = self.ax.triplot([0,0.1,0.1], [0,0.1,-0.1], [[0,1,2]], color='grey')
+
+            plt.xlabel("X(m)")
+            plt.ylabel("Y(m)")
+            plt.title('Triangulación de delaunay \nsin bordes exteriores y \ncon puntos medios',
+                      fontsize=18,
+                      color="black")
+
+            plt.legend()
     def callback_triangulacion(self, msg):
         blue_cones = msg.blue_cones
         yellow_cones = msg.yellow_cones
 
         triangulacion = Triangulacion(blue_cones, yellow_cones)
-        waypoints, path = triangulacion.triangulacion()
+        waypoints, path, P, s, x, y = triangulacion.triangulacion()
+
         if (path != None):
             self.pathMarkerPublisher.publish_marker(path[0], path[1])
+            if self.plot:
+                self.ax.set_xlim([-2.0, x[0] + 1.0])
+                self.ax.set_ylim([y[1] - 2.0, y[0] + 2.0])
 
+                self.conosPlt.set_xdata(P[:, 0])
+                self.conosPlt.set_ydata(P[:, 1])
+
+                self.puntosMediosPlt.set_xdata(waypoints[:, 0])
+                self.puntosMediosPlt.set_ydata(waypoints[:, 1])
+
+                self.interpolacionPlt.set_xdata(path[0])
+                self.interpolacionPlt.set_ydata(path[1])
+
+                self.triangulacionPlt.pop(0).remove()
+                self.triangulacionPlt = self.ax.triplot(P[:, 0], P[:, 1], s, color='grey')
+
+                # drawing updated values
+                self.figure.canvas.draw()
+
+                # This will run the GUI event
+                # loop until all UI events
+                # currently waiting have been processed
+                self.figure.canvas.flush_events()
 class Triangulacion():
 
     def __init__(self, conos_interiores, conos_exteriores):
@@ -72,7 +99,8 @@ class Triangulacion():
         self.interpolacion = None
         self.conos_interiores = np.array([[o.point.x, o.point.y] for o in conos_interiores])
         self.conos_exteriores = np.array([[o.point.x, o.point.y] for o in conos_exteriores])
-        # ESTO ES PROVISIONAL, Precondición: La lista de conos ya viene ordenada
+
+        # TODO, ESTO ES PROVISIONAL, Precondición: La lista de conos ya viene ordenada
         self.conos_exteriores = self.ordenar_respecto([0, 0], self.conos_exteriores)
         self.conos_interiores = self.ordenar_respecto([0, 0], self.conos_interiores)
 
@@ -116,7 +144,8 @@ class Triangulacion():
                     P[i * 2 + 1] = self.conos_exteriores[i]
 
             internal = []
-
+            # (12.939980506896973, 6.089759349822998) x
+            # (3.0638973712921143, -1.9238924980163574) y
             xMaxI, yMaxI = self.conos_interiores.max(axis=0)
             xMinI, yMinI = self.conos_interiores.min(axis=0)
 
@@ -124,13 +153,10 @@ class Triangulacion():
             xMinE, yMinE = self.conos_exteriores.min(axis=0)
 
             xMax, yMax = max(xMaxI, xMaxE), max(yMaxI, yMaxE)
-            xMin, yMin = max(xMinI, xMinE), max(yMinI, yMinE)
-
-            # self.ax.set_xlim([-2.0, xMax + 1.0])
-            # self.ax.set_ylim([yMin - 2.0, yMax + 2.0])
+            xMin, yMin = min(xMinI, xMinE), min(yMinI, yMinE)
 
             # Posición del eje de dirección (No esta bien)
-            dirX = 0.8
+            dirX = 0.0
             dirY = 0.0
 
             internal.append(np.array([dirX, dirY]))  # Para despues hacer la trayectoria desde el morro del coche
@@ -164,13 +190,13 @@ class Triangulacion():
 
             self.internalNp = np.array(internal)
 
-            tck, u = splprep([self.internalNp[:, 0], self.internalNp[:, 1]], k=3, s=32)
-            u = np.linspace(0, 1, num=50, endpoint=True)
+            tck, u = splprep([self.internalNp[:, 0], self.internalNp[:, 1]], k=5, s=32)
+            u = np.linspace(0, 1, num=100, endpoint=True)
             self.interpolacion = splev(u, tck)
 
-            return self.internalNp, self.interpolacion
+            return self.internalNp, self.interpolacion, P, s, (xMax, xMin), (yMax, yMin)
         else:
-            return None, None
+            return None, None, None, None, None, None
 
 class PathMarkerPublisher(Node):
 
@@ -194,14 +220,22 @@ class PathMarkerPublisher(Node):
             msg.poses.append(pose)
 
         self.publisher_.publish(msg)
+class Params(Node):
+    def __init__(self):
+        super().__init__('params_rclpy')
+        self.declare_parameter('plot', False)
+    def getPlot(self):
+        return self.get_parameter('plot').value
 
 def main(args=None):
     rclpy.init(args=args)
     topicPathMarker = '/planificacion/path'
     pathMarkerPublisher = PathMarkerPublisher(topicPathMarker)
-    # rclpy.spin(pathMarkerPublisher)
-    trackMiddelPath = TrackMiddlePath(pathMarkerPublisher)
 
+    params = Params()
+    plot = bool(params.getPlot())
+
+    trackMiddelPath = TrackMiddlePath(pathMarkerPublisher, plot)
     rclpy.spin(trackMiddelPath)
 
     # Destroy the node explicitly
@@ -210,6 +244,7 @@ def main(args=None):
 
     # pathMarkerPublisher.destroy_node()
     # trackMiddelPath.destroy_node()
+    # params.destroy_node()
 
     rclpy.shutdown()
 if __name__ == '__main__':
