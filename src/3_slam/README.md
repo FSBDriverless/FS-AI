@@ -1,2 +1,5 @@
-# FS-AI
-Repositorio para llevar a la competición de FS-AI en Silverstone
+# SLAM
+
+Subconjunto encargado de elaborar el mapa del entorno y localizar el vehículo
+en él.
+
