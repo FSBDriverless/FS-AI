@@ -35,5 +35,5 @@ Suponiendo que el el proyecto está clonado en ~/FS-AI y tenemos una terminal ab
 ```
 colcon build --packages-select delaunay_triangulation_midpoints
 source ./install/setup.bash
-ros2 run delaunay_triangulation_midpoints delaunay   
+ros2 run delaunay_triangulation_midpoints track_middle   
 ```
