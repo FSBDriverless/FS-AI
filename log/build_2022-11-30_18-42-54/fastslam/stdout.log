@@ -1,0 +1,46 @@
+running egg_info
+creating ../../../../build/fastslam/fastslam.egg-info
+writing ../../../../build/fastslam/fastslam.egg-info/PKG-INFO
+writing dependency_links to ../../../../build/fastslam/fastslam.egg-info/dependency_links.txt
+writing entry points to ../../../../build/fastslam/fastslam.egg-info/entry_points.txt
+writing requirements to ../../../../build/fastslam/fastslam.egg-info/requires.txt
+writing top-level names to ../../../../build/fastslam/fastslam.egg-info/top_level.txt
+writing manifest file '../../../../build/fastslam/fastslam.egg-info/SOURCES.txt'
+reading manifest file '../../../../build/fastslam/fastslam.egg-info/SOURCES.txt'
+writing manifest file '../../../../build/fastslam/fastslam.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/alan/FS-AI/build/fastslam/build
+creating /home/alan/FS-AI/build/fastslam/build/lib
+creating /home/alan/FS-AI/build/fastslam/build/lib/fastslam
+copying fastslam/algorithm.py -> /home/alan/FS-AI/build/fastslam/build/lib/fastslam
+copying fastslam/input.py -> /home/alan/FS-AI/build/fastslam/build/lib/fastslam
+copying fastslam/fast_slam2.py -> /home/alan/FS-AI/build/fastslam/build/lib/fastslam
+copying fastslam/output.py -> /home/alan/FS-AI/build/fastslam/build/lib/fastslam
+copying fastslam/__init__.py -> /home/alan/FS-AI/build/fastslam/build/lib/fastslam
+copying fastslam/draw.py -> /home/alan/FS-AI/build/fastslam/build/lib/fastslam
+running install
+running install_lib
+creating /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam
+copying /home/alan/FS-AI/build/fastslam/build/lib/fastslam/algorithm.py -> /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam
+copying /home/alan/FS-AI/build/fastslam/build/lib/fastslam/input.py -> /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam
+copying /home/alan/FS-AI/build/fastslam/build/lib/fastslam/fast_slam2.py -> /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam
+copying /home/alan/FS-AI/build/fastslam/build/lib/fastslam/output.py -> /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam
+copying /home/alan/FS-AI/build/fastslam/build/lib/fastslam/__init__.py -> /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam
+copying /home/alan/FS-AI/build/fastslam/build/lib/fastslam/draw.py -> /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam
+byte-compiling /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam/algorithm.py to algorithm.cpython-38.pyc
+byte-compiling /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam/input.py to input.cpython-38.pyc
+byte-compiling /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam/fast_slam2.py to fast_slam2.cpython-38.pyc
+byte-compiling /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam/output.py to output.cpython-38.pyc
+byte-compiling /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam/__init__.py to __init__.cpython-38.pyc
+byte-compiling /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam/draw.py to draw.cpython-38.pyc
+running install_data
+creating /home/alan/FS-AI/install/fastslam/share/ament_index
+creating /home/alan/FS-AI/install/fastslam/share/ament_index/resource_index
+creating /home/alan/FS-AI/install/fastslam/share/ament_index/resource_index/packages
+copying resource/fastslam -> /home/alan/FS-AI/install/fastslam/share/ament_index/resource_index/packages
+copying package.xml -> /home/alan/FS-AI/install/fastslam/share/fastslam
+running install_egg_info
+Copying ../../../../build/fastslam/fastslam.egg-info to /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam-0.0.0-py3.8.egg-info
+running install_scripts
+writing list of installed files to '/home/alan/FS-AI/build/fastslam/install.log'

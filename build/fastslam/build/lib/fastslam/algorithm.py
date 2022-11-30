@@ -38,6 +38,7 @@ class Slam:
         self.hxDR = self.xDR
         
         self.particles = [Particle(n_landmark) for _ in range(N_PARTICLE)]
+
     def iteration(self, delta_time, ud, z):
         global DT
         DT = delta_time

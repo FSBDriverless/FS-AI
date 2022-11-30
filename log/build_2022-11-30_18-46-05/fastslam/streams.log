@@ -1,0 +1,21 @@
+[0.636s] Invoking command in '/home/alan/FS-AI/src/3_slam/src/fastslam': PYTHONPATH=/home/alan/FS-AI/build/fastslam/prefix_override:/home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../../../build/fastslam build --build-base /home/alan/FS-AI/build/fastslam/build install --record /home/alan/FS-AI/build/fastslam/install.log --single-version-externally-managed
+[0.825s] running egg_info
+[0.826s] writing ../../../../build/fastslam/fastslam.egg-info/PKG-INFO
+[0.826s] writing dependency_links to ../../../../build/fastslam/fastslam.egg-info/dependency_links.txt
+[0.826s] writing entry points to ../../../../build/fastslam/fastslam.egg-info/entry_points.txt
+[0.826s] writing requirements to ../../../../build/fastslam/fastslam.egg-info/requires.txt
+[0.826s] writing top-level names to ../../../../build/fastslam/fastslam.egg-info/top_level.txt
+[0.860s] reading manifest file '../../../../build/fastslam/fastslam.egg-info/SOURCES.txt'
+[0.862s] writing manifest file '../../../../build/fastslam/fastslam.egg-info/SOURCES.txt'
+[0.863s] running build
+[0.863s] running build_py
+[0.863s] running install
+[0.865s] running install_lib
+[0.868s] running install_data
+[0.868s] running install_egg_info
+[0.871s] removing '/home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam-0.0.0-py3.8.egg-info' (and everything under it)
+[0.871s] Copying ../../../../build/fastslam/fastslam.egg-info to /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam-0.0.0-py3.8.egg-info
+[0.873s] running install_scripts
+[0.890s] Installing fastslam script to /home/alan/FS-AI/install/fastslam/lib/fastslam
+[0.890s] writing list of installed files to '/home/alan/FS-AI/build/fastslam/install.log'
+[0.913s] Invoked command in '/home/alan/FS-AI/src/3_slam/src/fastslam' returned '0': PYTHONPATH=/home/alan/FS-AI/build/fastslam/prefix_override:/home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../../../build/fastslam build --build-base /home/alan/FS-AI/build/fastslam/build install --record /home/alan/FS-AI/build/fastslam/install.log --single-version-externally-managed

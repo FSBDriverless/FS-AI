@@ -1,0 +1,5 @@
+  File "/home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam/input.py", line 4
+    from /home/alan/FS-AI/src/3_slam/src/fastslam/fastslam/algorithm import *
+         ^
+SyntaxError: invalid syntax
+

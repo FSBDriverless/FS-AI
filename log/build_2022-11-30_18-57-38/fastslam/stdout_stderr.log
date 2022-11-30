@@ -1,0 +1,28 @@
+running egg_info
+writing ../../../../build/fastslam/fastslam.egg-info/PKG-INFO
+writing dependency_links to ../../../../build/fastslam/fastslam.egg-info/dependency_links.txt
+writing entry points to ../../../../build/fastslam/fastslam.egg-info/entry_points.txt
+writing requirements to ../../../../build/fastslam/fastslam.egg-info/requires.txt
+writing top-level names to ../../../../build/fastslam/fastslam.egg-info/top_level.txt
+package init file 'fastslam/algoritmos/__init__.py' not found (or not a regular file)
+reading manifest file '../../../../build/fastslam/fastslam.egg-info/SOURCES.txt'
+writing manifest file '../../../../build/fastslam/fastslam.egg-info/SOURCES.txt'
+running build
+running build_py
+copying fastslam/input.py -> /home/alan/FS-AI/build/fastslam/build/lib/fastslam
+creating /home/alan/FS-AI/build/fastslam/build/lib/fastslam/algoritmos
+copying fastslam/algoritmos/algorithm.py -> /home/alan/FS-AI/build/fastslam/build/lib/fastslam/algoritmos
+running install
+running install_lib
+copying /home/alan/FS-AI/build/fastslam/build/lib/fastslam/input.py -> /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam
+creating /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam/algoritmos
+copying /home/alan/FS-AI/build/fastslam/build/lib/fastslam/algoritmos/algorithm.py -> /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam/algoritmos
+byte-compiling /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam/input.py to input.cpython-38.pyc
+byte-compiling /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam/algoritmos/algorithm.py to algorithm.cpython-38.pyc
+running install_data
+running install_egg_info
+removing '/home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam-0.0.0-py3.8.egg-info' (and everything under it)
+Copying ../../../../build/fastslam/fastslam.egg-info to /home/alan/FS-AI/install/fastslam/lib/python3.8/site-packages/fastslam-0.0.0-py3.8.egg-info
+running install_scripts
+Installing fastslam script to /home/alan/FS-AI/install/fastslam/lib/fastslam
+writing list of installed files to '/home/alan/FS-AI/build/fastslam/install.log'

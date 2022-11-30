@@ -1,0 +1,3 @@
+[console_scripts]
+fastslam = fastslam.input:main
+
