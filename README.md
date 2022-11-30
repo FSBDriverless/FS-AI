@@ -35,5 +35,20 @@ Suponiendo que el el proyecto está clonado en ~/FS-AI y tenemos una terminal ab
 ```
 colcon build --packages-select delaunay_triangulation_midpoints
 source ./install/setup.bash
-ros2 run delaunay_triangulation_midpoints track_middle   
+```
+* Para ejecutar el paquete que hace una planificación lineal:
+```
+ros2 run delaunay_triangulation_midpoints simple_middle_path  # Sin plot
+ros2 run delaunay_triangulation_midpoints simple_middle_path --ros-args -p plot:=True
+ # Con plot  
+ros2 run delaunay_triangulation_midpoints simple_middle_path --ros-args -p plot:=False
+ # Sin plot  
+```
+* Para ejecutar el paquete que hace una planificación mediante la triangulación de Delaunay:
+```
+ros2 run delaunay_triangulation_midpoints delaunay_middle_path  # Sin plot
+ros2 run delaunay_triangulation_midpoints delaunay_middle_path --ros-args -p plot:=True
+ # Con plot  
+ros2 run delaunay_triangulation_midpoints delaunay_middle_path --ros-args -p plot:=False
+ # Sin plot  
 ```

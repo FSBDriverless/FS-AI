@@ -18,7 +18,6 @@ from eufs_msgs.msg import ConeArrayWithCovariance
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import numpy as np
-from scipy.spatial import Delaunay
 from scipy.interpolate import splprep
 from scipy.interpolate import splev
 from rclpy.node import Node
@@ -34,7 +33,7 @@ class TrackMiddlePath(Node):
         self.subscription = self.create_subscription(
             ConeArrayWithCovariance,
             '/ground_truth/cones',
-            self.callback_triangulacion,
+            self.callback_planificacion,
             10)
         self.subscription  # prevent unused variable warning
 
@@ -48,42 +47,58 @@ class TrackMiddlePath(Node):
             self.imgCoche = AnnotationBbox(self.getImage('img/ads.png', zoom=0.25), (0, 0), frameon=False)
             self.ax.add_artist(self.imgCoche)
 
-            self.conosPlt, = self.ax.plot([], [], '.', label='Conos', color='orange')
-            self.puntosMediosPlt, = self.ax.plot([], [], '.', label='Puntos Medios', color='blue')
+            self.conosExtPlt, = self.ax.plot([], [], '.', markersize=15,label='Conos exteriores', color='blue')
+            self.conosExtLinePlt, = self.ax.plot([0,1], [1,1], color='blue')
+            self.conosIntPlt, = self.ax.plot([], [], '.', markersize=15, label='Conos interiores', color='#f6bd60')
+            self.conosIntLinePlt, = self.ax.plot([0,1], [0,0], color='#f6bd60')
+            self.puntosMediosPlt, = self.ax.plot([], [], '.', label='Puntos Medios', markersize=20,color='#a7c957')
             self.interpolacionPlt, = self.ax.plot([], [], label='Interpolación', color='red')
-            self.triangulacionPlt = self.ax.triplot([0,0.1,0.1], [0,0.1,-0.1], [[0,1,2]], color='grey')
-
+            self.conexionPlt = self.ax.plot([], [], color='grey')
+            self.lines = []
             plt.xlabel("X(m)")
             plt.ylabel("Y(m)")
-            plt.title('Triangulación de delaunay \nsin bordes exteriores y \ncon puntos medios',
+            plt.title('Planificación del centro de carril\nLINEAL',
                       fontsize=18,
                       color="black")
 
             plt.legend()
-    def callback_triangulacion(self, msg):
+    def callback_planificacion(self, msg):
         blue_cones = msg.blue_cones
         yellow_cones = msg.yellow_cones
 
-        triangulacion = Triangulacion(blue_cones, yellow_cones)
-        waypoints, path, P, s, x, y = triangulacion.triangulacion()
+        simple_path = SimpleMiddlePath(blue_cones, yellow_cones)
+        waypoints, path, P, s, x, y = simple_path.planificacion()
 
         if (path != None):
             self.pathMarkerPublisher.publish_marker(path[0], path[1])
-            if self.plot:
+            if self.plot: # Solo plotea si se lo hemos especificado por via parametros de ROS
                 self.ax.set_xlim([-2.0, x[0] + 1.0])
                 self.ax.set_ylim([y[1] - 2.0, y[0] + 2.0])
 
-                self.conosPlt.set_xdata(P[:, 0])
-                self.conosPlt.set_ydata(P[:, 1])
+                rangoInt = range(0, P.shape[0], 2)
+                self.conosIntPlt.set_xdata(P[rangoInt, 0])
+                self.conosIntPlt.set_ydata(P[rangoInt, 1])
+
+                self.conosIntLinePlt.set_xdata(P[rangoInt, 0])
+                self.conosIntLinePlt.set_ydata(P[rangoInt, 1])
+
+                rangoExt = range(1,P.shape[0],2)
+                self.conosExtPlt.set_xdata(P[rangoExt, 0])
+                self.conosExtPlt.set_ydata(P[rangoExt, 1])
+
+
+                self.conosExtLinePlt.set_xdata(P[rangoExt, 0])
+                self.conosExtLinePlt.set_ydata(P[rangoExt, 1])
 
                 self.puntosMediosPlt.set_xdata(waypoints[:, 0])
                 self.puntosMediosPlt.set_ydata(waypoints[:, 1])
 
                 self.interpolacionPlt.set_xdata(path[0])
                 self.interpolacionPlt.set_ydata(path[1])
-
-                self.triangulacionPlt.pop(0).remove()
-                self.triangulacionPlt = self.ax.triplot(P[:, 0], P[:, 1], s, color='grey')
+                [line.pop(0).remove() for line in self.lines]
+                self.lines=[]
+                for i in range(0, P.shape[0], 2):
+                    self.lines.append(self.ax.plot([P[i, 0], P[i + 1, 0]], [P[i, 1], P[i + 1, 1]], color='grey'))
 
                 # drawing updated values
                 self.figure.canvas.draw()
@@ -92,43 +107,38 @@ class TrackMiddlePath(Node):
                 # loop until all UI events
                 # currently waiting have been processed
                 self.figure.canvas.flush_events()
-class Triangulacion():
 
-    def __init__(self, conos_interiores, conos_exteriores):
+class SimpleMiddlePath():
+    conos_exteriores = None
+    conos_interiores = None
+
+    def __init__(self, conos_exteriores, conos_interiores):
         self.internalNp = None
         self.interpolacion = None
+        # self.conos_exteriores = conos_exteriores
+        # self.conos_interiores = conos_interiores
         self.conos_interiores = np.array([[o.point.x, o.point.y] for o in conos_interiores])
         self.conos_exteriores = np.array([[o.point.x, o.point.y] for o in conos_exteriores])
 
         # TODO, ESTO ES PROVISIONAL, Precondición: La lista de conos ya viene ordenada
         self.conos_exteriores = self.ordenar_respecto([0, 0], self.conos_exteriores)
         self.conos_interiores = self.ordenar_respecto([0, 0], self.conos_interiores)
+        # self.conos_exteriores = np.array(self.conos_exteriores)
+        # self.conos_interiores = np.array(self.conos_interiores)
 
     def ordenar_respecto(self, coche, lista):
         return np.array(sorted(lista, key=lambda p: (p[0] - coche[0]) ** 2 + (p[1] - coche[1]) ** 2))
 
-    def getEdges(self, triangle, edges, isEven):
-        # t0 t1
-        if (isEven[0] + isEven[1] == 1):
-            edges[triangle[0], triangle[1]] = 1
-            edges[triangle[1], triangle[0]] = 1
-        # t0 t2
-        if (isEven[0] + isEven[2] == 1):
-            edges[triangle[0], triangle[2]] = 1
-            edges[triangle[2], triangle[0]] = 1
-        # t1 t2
-        if (isEven[1] + isEven[2] == 1):
-            edges[triangle[1], triangle[2]] = 1
-            edges[triangle[2], triangle[1]] = 1
-        return edges
-
-    def triangulacion(self):
-
+    def planificacion(self):
+        s = []
         nci = len(self.conos_interiores)  # Numeros de conos interiores en la lista de conos
         col = 2
         nce = len(self.conos_exteriores)  # Numeros de conos exteriores en la lista de conos
         if (nci > 0 and nce > 0):
-
+            if (nci>nce): #Maximo 1 mas vamos a usar
+                nci = nce+1
+            elif(nce>nci): #Maximo 1 mas vamos a usar
+                nce = nci+1
             maxConosLado = max(nci, nce)
             P = np.zeros((2 * maxConosLado, col))
 
@@ -144,8 +154,7 @@ class Triangulacion():
                     P[i * 2 + 1] = self.conos_exteriores[i]
 
             internal = []
-            # (12.939980506896973, 6.089759349822998) x
-            # (3.0638973712921143, -1.9238924980163574) y
+
             xMaxI, yMaxI = self.conos_interiores.max(axis=0)
             xMinI, yMinI = self.conos_interiores.min(axis=0)
 
@@ -161,42 +170,23 @@ class Triangulacion():
 
             internal.append(np.array([dirX, dirY]))  # Para despues hacer la trayectoria desde el morro del coche
 
-            # edgesMatrix = np.zeros([P.shape[0], P.shape[0]])
-            edgesMatrix = np.zeros([maxConosLado * 2, maxConosLado * 2])
-
-            # Crear triangulacion con constantes
-            TR = Delaunay(P)
-
-            s = TR.simplices
-            i = 0
-            while (i < s.shape[0]):
-
-                x = s[i]
-                isEven = x % 2
-                if ((isEven[0] == 0 and isEven[1] == 0 and isEven[2] == 0) or (
-                        isEven[0] == 1 and isEven[1] == 1 and isEven[2] == 1)):
-                    s = np.delete(s, i, 0)
-                else:
-                    edgesMatrix = self.getEdges(x, edgesMatrix, isEven)
-                    i = i + 1
-
-            for fila in range(0, P.shape[0]):
-                for columna in range(0, fila):
-                    if (edgesMatrix[fila][columna] == 1):  # Es uno interno
-                        p1 = P[fila]
-                        p2 = P[columna]
-
-                        internal.append(np.array([(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2]))
+            cant_conos = max(nci, nce)
+            for i in range(0, cant_conos):
+                interior = P[2 * i]
+                exterior = P[2 * i + 1]
+                internal.append(np.array([(interior[0] + exterior[0]) / 2, (interior[1] + exterior[1]) / 2]))
+                s.append([2 * i, 2 * i + 1])
 
             self.internalNp = np.array(internal)
 
-            tck, u = splprep([self.internalNp[:, 0], self.internalNp[:, 1]], k=5, s=32)
+            tck, u = splprep([self.internalNp[:, 0], self.internalNp[:, 1]], k=3, s=32)
             u = np.linspace(0, 1, num=100, endpoint=True)
             self.interpolacion = splev(u, tck)
 
             return self.internalNp, self.interpolacion, P, s, (xMax, xMin), (yMax, yMin)
         else:
             return None, None, None, None, None, None
+
 
 class PathMarkerPublisher(Node):
 
@@ -220,6 +210,7 @@ class PathMarkerPublisher(Node):
             msg.poses.append(pose)
 
         self.publisher_.publish(msg)
+        print('Publishing path at ')
 class Params(Node):
     def __init__(self):
         super().__init__('params_rclpy')

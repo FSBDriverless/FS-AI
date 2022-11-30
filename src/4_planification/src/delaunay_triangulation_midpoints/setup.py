@@ -20,8 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'delaunay = delaunay_triangulation_midpoints.delaunay_triangulation:main',
-            'track_middle = delaunay_triangulation_midpoints.track_middle_path:main',
+            'simple_middle_path = delaunay_triangulation_midpoints.simple_middle_path:main',
+            'delaunay_middle_path = delaunay_triangulation_midpoints.delaunay_middle_path:main',
         ],
     },
 )
