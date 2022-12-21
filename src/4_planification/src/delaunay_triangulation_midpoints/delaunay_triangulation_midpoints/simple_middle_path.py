@@ -65,12 +65,13 @@ class TrackMiddlePath(Node):
     def callback_planificacion(self, msg):
         blue_cones = msg.blue_cones
         yellow_cones = msg.yellow_cones
-
-        simple_path = SimpleMiddlePath(blue_cones, yellow_cones)
+        big_orange_cones = msg.big_orange_cones
+        simple_path = SimpleMiddlePath(blue_cones, yellow_cones, big_orange_cones)
         waypoints, path, P, s, x, y = simple_path.planificacion()
 
-        if (path != None):
-            self.pathMarkerPublisher.publish_marker(path[0], path[1])
+        if (P.any()):
+            if (path != None):
+                self.pathMarkerPublisher.publish_marker(path[0], path[1])
             if self.plot: # Solo plotea si se lo hemos especificado por via parametros de ROS
                 self.ax.set_xlim([-2.0, x[0] + 1.0])
                 self.ax.set_ylim([y[1] - 2.0, y[0] + 2.0])
@@ -92,9 +93,10 @@ class TrackMiddlePath(Node):
 
                 self.puntosMediosPlt.set_xdata(waypoints[:, 0])
                 self.puntosMediosPlt.set_ydata(waypoints[:, 1])
+                if (path != None):
+                    self.interpolacionPlt.set_xdata(path[0])
+                    self.interpolacionPlt.set_ydata(path[1])
 
-                self.interpolacionPlt.set_xdata(path[0])
-                self.interpolacionPlt.set_ydata(path[1])
                 [line.pop(0).remove() for line in self.lines]
                 self.lines=[]
                 for i in range(0, P.shape[0], 2):
@@ -111,14 +113,29 @@ class TrackMiddlePath(Node):
 class SimpleMiddlePath():
     conos_exteriores = None
     conos_interiores = None
+    conos_naranjas_grandes_exteriores = None
+    conos_naranjas_grandes_interiores = None
 
-    def __init__(self, conos_exteriores, conos_interiores):
+    def __init__(self, conos_exteriores, conos_interiores, conos_naranjas_grandes): # Int = yellow, Ext = blue
         self.internalNp = None
         self.interpolacion = None
         # self.conos_exteriores = conos_exteriores
         # self.conos_interiores = conos_interiores
-        self.conos_interiores = np.array([[o.point.x, o.point.y] for o in conos_interiores])
-        self.conos_exteriores = np.array([[o.point.x, o.point.y] for o in conos_exteriores])
+        self.conos_interiores = [[o.point.x, o.point.y] for o in conos_interiores]
+        self.conos_exteriores = [[o.point.x, o.point.y] for o in conos_exteriores]
+
+        if conos_naranjas_grandes != None:
+            # self.conos_naranjas_grandes_exteriores = []
+            # self.conos_naranjas_grandes_interiores = []
+
+            for act in conos_naranjas_grandes:
+                if (act.point.y > 0): # Exterior
+                    # self.conos_naranjas_grandes_exteriores.append(act)
+                    self.conos_exteriores.append([act.point.x, act.point.y])
+                else: # Interior
+                    # self.conos_naranjas_grandes_interiores.append(act)
+                    self.conos_interiores.append([act.point.x, act.point.y])
+            # self.conos_naranjas_grandes = np.array([[o.point.x, o.point.y] for o in conos_naranjas_grandes])
 
         # TODO, ESTO ES PROVISIONAL, Precondición: La lista de conos ya viene ordenada
         self.conos_exteriores = self.ordenar_respecto([0, 0], self.conos_exteriores)
@@ -134,25 +151,47 @@ class SimpleMiddlePath():
         nci = len(self.conos_interiores)  # Numeros de conos interiores en la lista de conos
         col = 2
         nce = len(self.conos_exteriores)  # Numeros de conos exteriores en la lista de conos
+
         if (nci > 0 and nce > 0):
-            if (nci>nce): #Maximo 1 mas vamos a usar
-                nci = nce+1
-            elif(nce>nci): #Maximo 1 mas vamos a usar
-                nce = nci+1
-            maxConosLado = max(nci, nce)
-            P = np.zeros((2 * maxConosLado, col))
+            if (self.conos_naranjas_grandes_exteriores == None or self.conos_naranjas_grandes_interiores == None): # No estamos pasando por el inicio/fin
+                if (nci>nce): #Maximo 1 mas vamos a usar
+                    nci = nce+1
+                elif(nce>nci): #Maximo 1 mas vamos a usar
+                    nce = nci+1
+                maxConosLado = max(nci, nce)
+                P = np.zeros((2 * maxConosLado, col))
 
-            for i in range(0, maxConosLado):
-                if (i >= nci):  # Solo quedan conos exteriores
-                    P[i * 2] = self.conos_interiores[nci - 1]
-                    P[i * 2 + 1] = self.conos_exteriores[i]
-                elif (i >= nce):  # Solo quedan conos interiores
-                    P[i * 2] = self.conos_interiores[i]
-                    P[i * 2 + 1] = self.conos_exteriores[nce - 1]
-                else:  # Quedan de los 2
-                    P[i * 2] = self.conos_interiores[i]
-                    P[i * 2 + 1] = self.conos_exteriores[i]
+                for i in range(0, maxConosLado):
+                    if (i >= nci):  # Solo quedan conos exteriores
+                        P[i * 2] = self.conos_interiores[nci - 1]
+                        P[i * 2 + 1] = self.conos_exteriores[i]
+                    elif (i >= nce):  # Solo quedan conos interiores
+                        P[i * 2] = self.conos_interiores[i]
+                        P[i * 2 + 1] = self.conos_exteriores[nce - 1]
+                    else:  # Quedan de los 2
+                        P[i * 2] = self.conos_interiores[i]
+                        P[i * 2 + 1] = self.conos_exteriores[i]
 
+            else: # Estamos pasando por linea de meta/inicio
+                if (nci>nce): #Maximo 1 mas vamos a usar
+                    nci = nce + 1
+                    nci = nci + 1
+                    nce = nce + 1
+                elif(nce>nci): #Maximo 1 mas vamos a usar
+                    nce = nci+1
+                maxConosLado = max(nci, nce)
+                P = np.zeros((2 * maxConosLado, col))
+
+                for i in range(0, maxConosLado):
+                    if (i >= nci):  # Solo quedan conos exteriores
+                        P[i * 2] = self.conos_interiores[nci - 1]
+                        P[i * 2 + 1] = self.conos_exteriores[i]
+                    elif (i >= nce):  # Solo quedan conos interiores
+                        P[i * 2] = self.conos_interiores[i]
+                        P[i * 2 + 1] = self.conos_exteriores[nce - 1]
+                    else:  # Quedan de los 2
+                        P[i * 2] = self.conos_interiores[i]
+                        P[i * 2 + 1] = self.conos_exteriores[i]
             internal = []
 
             xMaxI, yMaxI = self.conos_interiores.max(axis=0)
@@ -165,7 +204,7 @@ class SimpleMiddlePath():
             xMin, yMin = min(xMinI, xMinE), min(yMinI, yMinE)
 
             # Posición del eje de dirección (No esta bien)
-            dirX = 0.0
+            dirX = 1.0
             dirY = 0.0
 
             internal.append(np.array([dirX, dirY]))  # Para despues hacer la trayectoria desde el morro del coche
@@ -178,14 +217,18 @@ class SimpleMiddlePath():
                 s.append([2 * i, 2 * i + 1])
 
             self.internalNp = np.array(internal)
+            m = self.internalNp.shape[0]
+            k = 3
+            if (k < m):
+                tck, u = splprep([self.internalNp[:, 0], self.internalNp[:, 1]], k=k, s=32)
+                u = np.linspace(0, 1, num=100, endpoint=True)
+                self.interpolacion = splev(u, tck)
 
-            tck, u = splprep([self.internalNp[:, 0], self.internalNp[:, 1]], k=3, s=32)
-            u = np.linspace(0, 1, num=100, endpoint=True)
-            self.interpolacion = splev(u, tck)
-
-            return self.internalNp, self.interpolacion, P, s, (xMax, xMin), (yMax, yMin)
+                return self.internalNp, self.interpolacion, P, s, (xMax, xMin), (yMax, yMin)
+            else:
+                return self.internalNp, None, P, s, (xMax, xMin), (yMax, yMin)
         else:
-            return None, None, None, None, None, None
+            return None, None, np.array([]), None, None, None
 
 
 class PathMarkerPublisher(Node):
