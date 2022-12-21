@@ -1,0 +1,31 @@
+running egg_info
+creating build/camara_cone_detection/camara_cone_detection.egg-info
+writing build/camara_cone_detection/camara_cone_detection.egg-info/PKG-INFO
+writing dependency_links to build/camara_cone_detection/camara_cone_detection.egg-info/dependency_links.txt
+writing entry points to build/camara_cone_detection/camara_cone_detection.egg-info/entry_points.txt
+writing requirements to build/camara_cone_detection/camara_cone_detection.egg-info/requires.txt
+writing top-level names to build/camara_cone_detection/camara_cone_detection.egg-info/top_level.txt
+writing manifest file 'build/camara_cone_detection/camara_cone_detection.egg-info/SOURCES.txt'
+reading manifest file 'build/camara_cone_detection/camara_cone_detection.egg-info/SOURCES.txt'
+writing manifest file 'build/camara_cone_detection/camara_cone_detection.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/build/camara_cone_detection/build
+creating /home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/build/camara_cone_detection/build/lib
+creating /home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/build/camara_cone_detection/build/lib/camara_cone_detection
+copying camara_cone_detection/__init__.py -> /home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/build/camara_cone_detection/build/lib/camara_cone_detection
+running install
+running install_lib
+creating /home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/install/camara_cone_detection/lib/python3.8/site-packages/camara_cone_detection
+copying /home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/build/camara_cone_detection/build/lib/camara_cone_detection/__init__.py -> /home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/install/camara_cone_detection/lib/python3.8/site-packages/camara_cone_detection
+byte-compiling /home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/install/camara_cone_detection/lib/python3.8/site-packages/camara_cone_detection/__init__.py to __init__.cpython-38.pyc
+running install_data
+creating /home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/install/camara_cone_detection/share/ament_index
+creating /home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/install/camara_cone_detection/share/ament_index/resource_index
+creating /home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/install/camara_cone_detection/share/ament_index/resource_index/packages
+copying resource/camara_cone_detection -> /home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/install/camara_cone_detection/share/ament_index/resource_index/packages
+copying package.xml -> /home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/install/camara_cone_detection/share/camara_cone_detection
+running install_egg_info
+Copying build/camara_cone_detection/camara_cone_detection.egg-info to /home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/install/camara_cone_detection/lib/python3.8/site-packages/camara_cone_detection-0.0.0-py3.8.egg-info
+running install_scripts
+writing list of installed files to '/home/gorka/FSB/FS-AI/src/1_perception/camara_cone_detection/build/camara_cone_detection/install.log'
